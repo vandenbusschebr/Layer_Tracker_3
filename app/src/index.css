@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=New+Amsterdam&family=Montserrat:wght@500;700&display=swap');
+
+@theme {
+  --font-heading: 'New Amsterdam', sans-serif;
+  --font-mono: 'Montserrat', monospace;
+
+  --color-brand-10: #EAF5F3;
+  --color-brand-20: #C1DDD9;
+  --color-brand-60: #8BBDB8;
+  --color-brand-100: #4B8D85;
+  --color-brand-120: #2D6560;
+  --color-brand-140: #153B39;
+
+  --color-grey-00: #FFFFFF;
+  --color-grey-10: #EAEBEB;
+  --color-grey-20: #D5D8D7;
+  --color-grey-40: #ABB0AF;
+  --color-grey-60: #808988;
+  --color-grey-80: #566160;
+  --color-grey-100: #2C3A38;
+  --color-grey-120: #232E2D;
+  --color-grey-140: #1A2322;
+  --color-grey-160: #121716;
+  --color-grey-180: #000000;
+
+  --color-surface: #000000;
+  --color-overlay: #1A2322;
+  --color-primary-text: #F5F4F2;
+  --color-disabled-text: #D5D8D7;
+  --color-brand-text: #4B8D85;
+
+  --color-stoked: #3D6B52;
+  --color-stoked-glow: #8BA697;
+  --color-chilly: #2D5FA8;
+  --color-chilly-glow: #2D5FA8;
+  --color-drippin: #8C2E2E;
+  --color-drippin-glow: #8C2E2E;
+}
+
+::placeholder {
+  color: rgba(245, 244, 242, 0.5);
+}
+
+body {
+  margin: 0;
+  background-color: #000000;
+  color: #F5F4F2;
+  font-family: 'Montserrat', monospace;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100svh;
+}
