@@ -43,14 +43,16 @@
   color: rgba(245, 244, 242, 0.5);
 }
 
-body {
+html, body {
   margin: 0;
   background-color: #000000;
   color: #F5F4F2;
   font-family: 'Montserrat', monospace;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 #root {
   min-height: 100svh;
+  overflow-x: hidden;
 }

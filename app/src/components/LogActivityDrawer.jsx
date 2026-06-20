@@ -105,6 +105,8 @@ export default function LogActivityDrawer({ open, onClose, clothingCatalog = [],
           backgroundColor: semantic.drawerBg,
           transform: open ? 'translateY(0)' : 'translateY(100%)',
           transition: 'transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)',
+          touchAction: 'pan-y',
+          overflowX: 'hidden',
         }}
       >
         {/* Title row with close button */}
