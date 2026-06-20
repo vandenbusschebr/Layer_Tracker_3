@@ -50,6 +50,9 @@ html, body {
   font-family: 'Montserrat', monospace;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  overscroll-behavior-x: none;
+  width: 100%;
+  max-width: 100vw;
 }
 
 #root {
