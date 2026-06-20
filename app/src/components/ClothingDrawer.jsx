@@ -352,7 +352,7 @@ export default function ClothingDrawer({ open, onClose }) {
       <div
         className="fixed left-0 right-0 bottom-0 z-50 flex flex-col transition-transform duration-300 ease-out overflow-hidden"
         style={{
-          height: '90vh',
+          height: '80vh',
           maxHeight: '1000px',
           backgroundColor: semantic.overlay,
           borderRadius: '12px 12px 0 0',

@@ -126,7 +126,7 @@ export default function FilterDrawer({ open, onClose, filters, onChange }) {
         className="fixed bottom-0 left-0 right-0 z-50 flex flex-col rounded-t-2xl"
         style={{
           backgroundColor: semantic.drawerBg,
-          height: '90vh',
+          height: '80vh',
           maxHeight: '1000px',
           transform: open ? 'translateY(0)' : 'translateY(100%)',
           transition: 'transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)',

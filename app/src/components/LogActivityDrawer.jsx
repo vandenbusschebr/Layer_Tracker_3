@@ -124,7 +124,7 @@ export default function LogActivityDrawer({ open, onClose, clothingCatalog = [],
         </div>
 
         {/* Scrollable content */}
-        <div className="overflow-y-auto flex-1 px-5 pb-8 space-y-6">
+        <div className="overflow-y-auto flex-1 px-5 pb-8 space-y-6" style={{ overflowX: 'hidden', overscrollBehaviorX: 'none' }}>
 
           {/* Date */}
           <div>

@@ -167,7 +167,7 @@ export default function EditActivityDrawer({ open, onClose, activity, clothingCa
         </div>
 
         {/* Scrollable content */}
-        <div className="overflow-y-auto flex-1">
+        <div className="overflow-y-auto flex-1" style={{ overflowX: 'hidden', overscrollBehaviorX: 'none' }}>
         <div className="px-5 space-y-6 mx-auto w-full" style={{ maxWidth: '600px' }}>
 
           {/* Date */}
