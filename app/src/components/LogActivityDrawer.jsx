@@ -39,7 +39,6 @@ export default function LogActivityDrawer({ open, onClose, clothingCatalog = [],
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
 
-  const startY = useRef(null);
   const drawerRef = useRef(null);
 
   useEffect(() => {
@@ -58,13 +57,6 @@ export default function LogActivityDrawer({ open, onClose, clothingCatalog = [],
     }
   }, [open]);
 
-  function handleTouchStart(e) {
-    startY.current = e.touches[0].clientY;
-  }
-  function handleTouchEnd(e) {
-    const delta = e.changedTouches[0].clientY - startY.current;
-    if (delta > 60) onClose();
-  }
 
   function toggleBaseLayer(id) {
     setSelectedBaseLayers(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
@@ -124,7 +116,7 @@ export default function LogActivityDrawer({ open, onClose, clothingCatalog = [],
             style={{ backgroundColor: semantic.inputBg, border: `1px solid ${semantic.inputBorder}` }}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <path d="M18 6L6 18M6 6l12 12" stroke={semantic.labelText} strokeWidth="2" strokeLinecap="round" />
+              <path d="M18 6L6 18M6 6l12 12" stroke={semantic.brand} strokeWidth="2" strokeLinecap="round" />
             </svg>
           </button>
         </div>
@@ -268,9 +260,10 @@ export default function LogActivityDrawer({ open, onClose, clothingCatalog = [],
           <button
             onClick={handleSave}
             disabled={saving}
-            className="w-full py-4 rounded-lg text-xl transition-opacity"
+            className="w-full py-4 rounded-lg text-xl transition-opacity mx-auto block"
             style={{
               ...HEADING_STYLE,
+              maxWidth: '250px',
               backgroundColor: saving ? semantic.brandSaving : semantic.brand,
               color: semantic.primaryText,
               boxShadow: semantic.brandShadow,

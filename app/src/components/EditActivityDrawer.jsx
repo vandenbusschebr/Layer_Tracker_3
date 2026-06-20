@@ -37,7 +37,6 @@ export default function EditActivityDrawer({ open, onClose, activity, clothingCa
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
   const original = useRef(null);
 
-  const startY = useRef(null);
 
   useEffect(() => {
     if (open && activity) {
@@ -88,11 +87,6 @@ export default function EditActivityDrawer({ open, onClose, activity, clothingCa
     } else {
       onClose();
     }
-  }
-
-  function handleTouchStart(e) { startY.current = e.touches[0].clientY; }
-  function handleTouchEnd(e) {
-    if (e.changedTouches[0].clientY - startY.current > 60) handleClose();
   }
 
   function toggleBaseLayer(id) {
@@ -155,8 +149,6 @@ export default function EditActivityDrawer({ open, onClose, activity, clothingCa
           transform: open ? 'translateY(0)' : 'translateY(100%)',
           transition: 'transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)',
         }}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
       >
         {/* Title row with close button */}
         <div className="px-5 pt-12 pb-4 shrink-0 flex items-center justify-between">
@@ -167,13 +159,14 @@ export default function EditActivityDrawer({ open, onClose, activity, clothingCa
             style={{ backgroundColor: semantic.inputBg, border: `1px solid ${semantic.inputBorder}` }}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <path d="M18 6L6 18M6 6l12 12" stroke={semantic.labelText} strokeWidth="2" strokeLinecap="round" />
+              <path d="M18 6L6 18M6 6l12 12" stroke={semantic.brand} strokeWidth="2" strokeLinecap="round" />
             </svg>
           </button>
         </div>
 
         {/* Scrollable content */}
-        <div className="overflow-y-auto flex-1 px-5 space-y-6">
+        <div className="overflow-y-auto flex-1">
+        <div className="px-5 space-y-6 mx-auto w-full" style={{ maxWidth: '600px' }}>
 
           {/* Date */}
           <div>
@@ -278,26 +271,14 @@ export default function EditActivityDrawer({ open, onClose, activity, clothingCa
           </div>
 
           {/* Action buttons */}
-          <div className="flex flex-col gap-3 pb-8">
-            <button
-              onClick={handleDelete}
-              disabled={deleting}
-              className="w-full py-3 rounded-lg text-xl transition-opacity hover:opacity-80"
-              style={{
-                ...HEADING_STYLE,
-                backgroundColor: semantic.error,
-                color: semantic.primaryText,
-              }}
-            >
-              {deleting ? 'DELETING...' : 'DELETE'}
-            </button>
-
+          <div className="flex flex-col gap-3 pb-8 items-center">
             <button
               onClick={handleSave}
               disabled={saving}
               className="w-full py-3 rounded-lg text-xl transition-opacity hover:opacity-80"
               style={{
                 ...HEADING_STYLE,
+                maxWidth: '250px',
                 backgroundColor: saving ? semantic.brandSaving : semantic.brand,
                 color: semantic.primaryText,
                 boxShadow: semantic.brandShadow,
@@ -305,7 +286,23 @@ export default function EditActivityDrawer({ open, onClose, activity, clothingCa
             >
               {saving ? 'SAVING...' : 'SAVE'}
             </button>
+
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              className="w-full py-3 rounded-lg text-xl transition-opacity hover:opacity-80"
+              style={{
+                ...HEADING_STYLE,
+                maxWidth: '250px',
+                backgroundColor: 'transparent',
+                border: `1px solid ${semantic.errorText}`,
+                color: semantic.errorText,
+              }}
+            >
+              {deleting ? 'DELETING...' : 'DELETE'}
+            </button>
           </div>
+        </div>
         </div>
       </div>
 

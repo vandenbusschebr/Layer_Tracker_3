@@ -1,4 +1,3 @@
-import { useRef } from 'react';
 import { semantic, fonts, monoStyle, labelStyle as LABEL_STYLE, headingStyle as HEADING_STYLE, feelConfig } from '../lib/theme';
 
 const TEMP_MIN = -32;
@@ -101,13 +100,6 @@ function toggle(arr, val) {
 }
 
 export default function FilterDrawer({ open, onClose, filters, onChange }) {
-  const startY = useRef(null);
-
-  function handleTouchStart(e) { startY.current = e.touches[0].clientY; }
-  function handleTouchEnd(e) {
-    if (e.changedTouches[0].clientY - startY.current > 60) onClose();
-  }
-
   function handleReset() {
     onChange({ sort: 'date-desc', types: [], feels: [], tempRange: [TEMP_MIN, TEMP_MAX] });
   }
@@ -122,6 +114,8 @@ export default function FilterDrawer({ open, onClose, filters, onChange }) {
         className="fixed inset-0 z-40 transition-opacity duration-300"
         style={{
           backgroundColor: semantic.backdrop,
+          backdropFilter: 'blur(6px)',
+          WebkitBackdropFilter: 'blur(6px)',
           opacity: open ? 1 : 0,
           pointerEvents: open ? 'auto' : 'none',
         }}
@@ -132,37 +126,42 @@ export default function FilterDrawer({ open, onClose, filters, onChange }) {
         className="fixed bottom-0 left-0 right-0 z-50 flex flex-col rounded-t-2xl"
         style={{
           backgroundColor: semantic.drawerBg,
-          maxHeight: '80vh',
+          height: '90vh',
+          maxHeight: '1000px',
           transform: open ? 'translateY(0)' : 'translateY(100%)',
           transition: 'transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)',
         }}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
       >
-        {/* Handle */}
-        <div className="flex justify-center pt-3 pb-1 shrink-0">
-          <div className="w-10 h-1 rounded-full" style={{ backgroundColor: semantic.drawerHandle }} />
-        </div>
-
         {/* Title row */}
-        <div className="px-5 pt-2 pb-4 shrink-0 flex items-center justify-between">
+        <div className="px-5 pt-5 pb-4 shrink-0 flex items-center justify-between">
           <h2 className="text-3xl" style={{ ...HEADING_STYLE, color: semantic.primaryText }}>FILTER</h2>
-          {activeFilterCount > 0 && (
+          <div className="flex items-center gap-3">
+            {activeFilterCount > 0 && (
+              <button
+                onClick={handleReset}
+                style={{
+                  ...monoStyle,
+                  fontSize: '12px',
+                  color: semantic.brand,
+                  letterSpacing: '0.04em',
+                }}
+              >
+                RESET
+              </button>
+            )}
             <button
-              onClick={handleReset}
-              style={{
-                ...monoStyle,
-                fontSize: '12px',
-                color: semantic.brand,
-                letterSpacing: '0.04em',
-              }}
+              onClick={onClose}
+              className="w-9 h-9 flex items-center justify-center rounded-full transition-opacity hover:opacity-70"
+              style={{ backgroundColor: semantic.inputBg, border: `1px solid ${semantic.inputBorder}` }}
             >
-              RESET
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                <path d="M18 6L6 18M6 6l12 12" stroke={semantic.brand} strokeWidth="2" strokeLinecap="round" />
+              </svg>
             </button>
-          )}
+          </div>
         </div>
 
-        <div className="overflow-y-auto flex-1 px-5 space-y-6">
+        <div className="overflow-y-auto flex-1 px-5 space-y-6" style={{ paddingBottom: '88px' }}>
 
           {/* Sort */}
           <div>
@@ -261,22 +260,27 @@ export default function FilterDrawer({ open, onClose, filters, onChange }) {
 
         </div>
 
-        {/* Apply button */}
-        <div className="px-5 pt-8 pb-4 shrink-0">
+        <div className="pb-6 shrink-0" />
+      </div>
+
+      {/* Floating Apply button */}
+      {open && (
+        <div className="fixed bottom-6 left-0 right-0 px-5 z-50" style={{ pointerEvents: 'none' }}>
           <button
             onClick={onClose}
-            className="w-full py-4 rounded-lg text-xl transition-opacity hover:opacity-80"
+            className="w-full py-4 rounded-xl text-xl transition-opacity hover:opacity-80"
             style={{
               ...HEADING_STYLE,
+              pointerEvents: 'auto',
               backgroundColor: semantic.brand,
               color: semantic.primaryText,
-              boxShadow: semantic.brandShadow,
+              boxShadow: '0 8px 24px rgba(0,0,0,0.5), 0 4px 16px rgba(75,141,133,0.4)',
             }}
           >
             APPLY
           </button>
         </div>
-      </div>
+      )}
     </>
   );
 }

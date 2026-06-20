@@ -45,7 +45,7 @@ export default function ClothingPicker({ items, selected, onToggle }) {
                   className="absolute inset-0 flex items-center justify-center"
                   style={{ backgroundColor: semantic.selectedOverlay }}
                 >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                     <path d="M5 13l4 4L19 7" stroke={semantic.primaryText} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>

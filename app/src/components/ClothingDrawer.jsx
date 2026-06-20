@@ -97,19 +97,7 @@ function AddPanel({ defaultCategory, onSave, onCancel }) {
       </div>
 
       {/* Buttons */}
-      <div className="px-5 flex flex-col gap-3">
-        <button
-          onClick={onCancel}
-          className="w-full py-3 rounded-lg text-xl transition-opacity hover:opacity-80"
-          style={{
-            ...HEADING_STYLE,
-            backgroundColor: semantic.inputBg,
-            border: `1px solid ${semantic.inputBorder}`,
-            color: semantic.labelText,
-          }}
-        >
-          CANCEL
-        </button>
+      <div className="px-5 flex flex-col gap-3 items-center">
         <button
           onClick={async () => {
             if (!name.trim()) { setNameError(true); return; }
@@ -131,12 +119,26 @@ function AddPanel({ defaultCategory, onSave, onCancel }) {
           className="w-full py-3 rounded-lg text-xl transition-opacity hover:opacity-80"
           style={{
             ...HEADING_STYLE,
+            maxWidth: '250px',
             backgroundColor: saving ? semantic.brandSaving : semantic.brand,
             color: semantic.primaryText,
             boxShadow: semantic.brandShadow,
           }}
         >
           {saving ? 'SAVING...' : 'SAVE'}
+        </button>
+        <button
+          onClick={onCancel}
+          className="w-full py-3 rounded-lg text-xl transition-opacity hover:opacity-80"
+          style={{
+            ...HEADING_STYLE,
+            maxWidth: '250px',
+            backgroundColor: semantic.inputBg,
+            border: `1px solid ${semantic.inputBorder}`,
+            color: semantic.labelText,
+          }}
+        >
+          CANCEL
         </button>
       </div>
     </div>
@@ -162,6 +164,7 @@ function EditPanel({ item, onSave, onDelete, onCancel }) {
       className="absolute inset-0 z-10 flex flex-col pt-8"
       style={{ backgroundColor: semantic.overlay, borderRadius: '12px 12px 0 0' }}
     >
+      <div className="mx-auto w-full flex flex-col flex-1" style={{ maxWidth: '600px' }}>
       {/* Name input */}
       <div className="px-5 pb-5">
         <label className="block text-xs mb-2" style={{ ...monoStyle, color: semantic.labelText }}>
@@ -204,30 +207,7 @@ function EditPanel({ item, onSave, onDelete, onCancel }) {
       </div>
 
       {/* Buttons */}
-      <div className="px-5 flex flex-col gap-3">
-        <button
-          onClick={onCancel}
-          className="w-full py-3 rounded-lg text-xl transition-opacity hover:opacity-80"
-          style={{
-            ...HEADING_STYLE,
-            backgroundColor: semantic.inputBg,
-            border: `1px solid ${semantic.inputBorder}`,
-            color: semantic.labelText,
-          }}
-        >
-          CANCEL
-        </button>
-        <button
-          onClick={() => onDelete(item)}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-lg transition-opacity hover:opacity-80"
-          style={{
-            ...HEADING_STYLE,
-            backgroundColor: semantic.error,
-            color: semantic.primaryText,
-          }}
-        >
-          DELETE
-        </button>
+      <div className="px-5 flex flex-col gap-3 items-center">
         <button
           onClick={async () => {
             setSaving(true);
@@ -248,6 +228,7 @@ function EditPanel({ item, onSave, onDelete, onCancel }) {
           className="w-full py-3 rounded-lg text-xl transition-opacity hover:opacity-80"
           style={{
             ...HEADING_STYLE,
+            maxWidth: '250px',
             backgroundColor: saving ? semantic.brandSaving : semantic.brand,
             color: semantic.primaryText,
             boxShadow: semantic.brandShadow,
@@ -255,6 +236,33 @@ function EditPanel({ item, onSave, onDelete, onCancel }) {
         >
           {saving ? 'SAVING...' : 'SAVE'}
         </button>
+        <button
+          onClick={onCancel}
+          className="w-full py-3 rounded-lg text-xl transition-opacity hover:opacity-80"
+          style={{
+            ...HEADING_STYLE,
+            maxWidth: '250px',
+            backgroundColor: semantic.inputBg,
+            border: `1px solid ${semantic.inputBorder}`,
+            color: semantic.labelText,
+          }}
+        >
+          CANCEL
+        </button>
+        <button
+          onClick={() => onDelete(item)}
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-lg transition-opacity hover:opacity-80"
+          style={{
+            ...HEADING_STYLE,
+            maxWidth: '250px',
+            backgroundColor: 'transparent',
+            border: `1px solid ${semantic.errorText}`,
+            color: semantic.errorText,
+          }}
+        >
+          DELETE
+        </button>
+      </div>
       </div>
     </div>
   );
@@ -332,6 +340,8 @@ export default function ClothingDrawer({ open, onClose }) {
         className="fixed inset-0 z-40 transition-opacity duration-300"
         style={{
           backgroundColor: semantic.backdrop,
+          backdropFilter: 'blur(6px)',
+          WebkitBackdropFilter: 'blur(6px)',
           opacity: open ? 1 : 0,
           pointerEvents: open ? 'auto' : 'none',
         }}
@@ -342,27 +352,19 @@ export default function ClothingDrawer({ open, onClose }) {
       <div
         className="fixed left-0 right-0 bottom-0 z-50 flex flex-col transition-transform duration-300 ease-out overflow-hidden"
         style={{
-          height: '80vh',
+          height: '90vh',
+          maxHeight: '1000px',
           backgroundColor: semantic.overlay,
           borderRadius: '12px 12px 0 0',
           transform: open ? 'translateY(0)' : 'translateY(100%)',
           borderTop: `1px solid ${semantic.divider}`,
         }}
       >
-        {/* Drag handle */}
-        <div
-          className="shrink-0 flex justify-center pt-3 pb-1 cursor-grab"
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-        >
-          <div className="w-10 h-1 rounded-full" style={{ backgroundColor: semantic.drawerHandle }} />
-        </div>
-
-        {/* Tabs */}
-        <div className="shrink-0 pt-6 pb-2 flex justify-center">
+        {/* Close button + Tabs */}
+        <div className="shrink-0 flex items-center justify-center px-5 pt-5 pb-2 relative">
           <div
             className="relative inline-flex rounded-full p-1"
-            style={{ border: `1px solid ${semantic.brand}` }}
+            style={{ backgroundColor: semantic.inputBg, border: `1px solid ${semantic.inputBorder}` }}
           >
             <div
               className="absolute top-1 bottom-1 rounded-full"
@@ -390,11 +392,20 @@ export default function ClothingDrawer({ open, onClose }) {
               </button>
             ))}
           </div>
+          <button
+            onClick={onClose}
+            className="absolute right-5 w-9 h-9 flex items-center justify-center rounded-full transition-opacity hover:opacity-70"
+            style={{ backgroundColor: semantic.inputBg, border: `1px solid ${semantic.inputBorder}` }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M18 6L6 18M6 6l12 12" stroke={semantic.brand} strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </button>
         </div>
 
         {/* Grid — scrollable */}
         <div className="flex-1 overflow-y-auto px-5 pt-5 pb-24">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4 mx-auto" style={{ maxWidth: '600px' }}>
             {items.map(item => (
               <button
                 key={item.id}

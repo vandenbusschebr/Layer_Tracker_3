@@ -30,6 +30,12 @@ export default function App() {
   const firstCardRef = useRef(null);
 
   useEffect(() => {
+    const anyOpen = clothingOpen || logOpen || filterOpen || !!editActivity;
+    document.body.style.overflow = anyOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [clothingOpen, logOpen, filterOpen, editActivity]);
+
+  useEffect(() => {
     function handleScroll() {
       if (!headerRef.current) return;
       const headerH = headerRef.current.offsetHeight;
@@ -97,8 +103,8 @@ export default function App() {
         {visibleActivities.map((activity, index) => (
           <div key={activity.id} ref={index === 0 ? firstCardRef : null}>
             <p
-              className="text-xs font-medium mb-2 px-1"
-              style={{ ...monoStyle, color: semantic.primaryText, opacity: 0.8 }}
+              className="text-xs font-medium mb-2 px-1 mx-auto w-full"
+              style={{ ...monoStyle, color: semantic.primaryText, opacity: 0.8, maxWidth: '600px' }}
             >
               {formatDate(activity.date)}
             </p>

@@ -34,8 +34,9 @@ export default function ActivityCard({ activity, clothingCatalog = [] }) {
   return (
     <>
       <div
-        className="rounded-sm p-4 mb-1"
+        className="rounded-sm p-4 mb-1 mx-auto w-full"
         style={{
+          maxWidth: '600px',
           background: semantic.cardGradient,
           boxShadow: `-3px -6px 24px 0 ${feelCfg.shadow}66`,
         }}
