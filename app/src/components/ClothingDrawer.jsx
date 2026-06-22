@@ -1,11 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
 import { PlusIcon, Pencil1Icon } from '@radix-ui/react-icons';
 import { fetchClothing, createClothingItem, updateClothingItem, deleteClothingItem, uploadImage } from '../lib/api';
-import { semantic, fonts, monoStyle, headingStyle as HEADING_STYLE } from '../lib/theme';
+import { useTheme } from '../lib/ThemeContext';
+import CloseButton from './CloseButton';
 
 const TABS = ['Base Layers', 'Outerwear'];
 
 function AddPanel({ defaultCategory, onSave, onCancel }) {
+  const { semantic, fonts, themeName } = useTheme();
+  const inputClass = themeName === 'nationalPark' ? 'np-input' : '';
+  const isNP = themeName === 'nationalPark';
+  const monoStyle = { fontFamily: fonts.mono, fontWeight: 800 };
+  const HEADING_STYLE = { fontFamily: fonts.heading, letterSpacing: '0.06em' };
   const [name, setName] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [category, setCategory] = useState(defaultCategory);
@@ -24,7 +30,7 @@ function AddPanel({ defaultCategory, onSave, onCancel }) {
   return (
     <div
       className="absolute inset-0 z-10 flex flex-col pt-8"
-      style={{ backgroundColor: semantic.overlay, borderRadius: '12px 12px 0 0' }}
+      style={{ backgroundColor: semantic.drawerBg, borderRadius: '12px 12px 0 0' }}
     >
       {/* Name input */}
       <div className="px-5 pb-5">
@@ -35,7 +41,7 @@ function AddPanel({ defaultCategory, onSave, onCancel }) {
           type="text"
           value={name}
           placeholder="e.g. Rain Jacket"
-          className="w-full px-4 py-3 rounded-lg outline-none text-base"
+          className={`w-full px-4 py-3 rounded-lg outline-none text-base ${inputClass}`}
           style={{
             ...monoStyle,
             backgroundColor: semantic.inputBg,
@@ -121,8 +127,8 @@ function AddPanel({ defaultCategory, onSave, onCancel }) {
             ...HEADING_STYLE,
             maxWidth: '250px',
             backgroundColor: saving ? semantic.brandSaving : semantic.brand,
-            color: semantic.primaryText,
-            boxShadow: semantic.brandShadow,
+            color: semantic.primaryButtonColor,
+            boxShadow: semantic.primaryButtonShadow,
           }}
         >
           {saving ? 'SAVING...' : 'SAVE'}
@@ -133,9 +139,9 @@ function AddPanel({ defaultCategory, onSave, onCancel }) {
           style={{
             ...HEADING_STYLE,
             maxWidth: '250px',
-            backgroundColor: semantic.inputBg,
-            border: `1px solid ${semantic.inputBorder}`,
-            color: semantic.labelText,
+            backgroundColor: isNP ? 'transparent' : semantic.inputBg,
+            border: `1px solid ${isNP ? semantic.brand : semantic.inputBorder}`,
+            color: isNP ? semantic.brand : semantic.labelText,
           }}
         >
           CANCEL
@@ -146,6 +152,10 @@ function AddPanel({ defaultCategory, onSave, onCancel }) {
 }
 
 function EditPanel({ item, onSave, onDelete, onCancel }) {
+  const { semantic, fonts, themeName } = useTheme();
+  const isNP = themeName === 'nationalPark';
+  const monoStyle = { fontFamily: fonts.mono, fontWeight: 800 };
+  const HEADING_STYLE = { fontFamily: fonts.heading, letterSpacing: '0.06em' };
   const [name, setName] = useState(item.name);
   const [imageUrl, setImageUrl] = useState(item.imageUrl);
   const [saving, setSaving] = useState(false);
@@ -162,7 +172,7 @@ function EditPanel({ item, onSave, onDelete, onCancel }) {
   return (
     <div
       className="absolute inset-0 z-10 flex flex-col pt-8"
-      style={{ backgroundColor: semantic.overlay, borderRadius: '12px 12px 0 0' }}
+      style={{ backgroundColor: semantic.drawerBg, borderRadius: '12px 12px 0 0' }}
     >
       <div className="mx-auto w-full flex flex-col flex-1" style={{ maxWidth: '600px' }}>
       {/* Name input */}
@@ -230,8 +240,8 @@ function EditPanel({ item, onSave, onDelete, onCancel }) {
             ...HEADING_STYLE,
             maxWidth: '250px',
             backgroundColor: saving ? semantic.brandSaving : semantic.brand,
-            color: semantic.primaryText,
-            boxShadow: semantic.brandShadow,
+            color: semantic.primaryButtonColor,
+            boxShadow: semantic.primaryButtonShadow,
           }}
         >
           {saving ? 'SAVING...' : 'SAVE'}
@@ -242,9 +252,9 @@ function EditPanel({ item, onSave, onDelete, onCancel }) {
           style={{
             ...HEADING_STYLE,
             maxWidth: '250px',
-            backgroundColor: semantic.inputBg,
-            border: `1px solid ${semantic.inputBorder}`,
-            color: semantic.labelText,
+            backgroundColor: isNP ? 'transparent' : semantic.inputBg,
+            border: `1px solid ${isNP ? semantic.brand : semantic.inputBorder}`,
+            color: isNP ? semantic.brand : semantic.labelText,
           }}
         >
           CANCEL
@@ -269,11 +279,20 @@ function EditPanel({ item, onSave, onDelete, onCancel }) {
 }
 
 export default function ClothingDrawer({ open, onClose }) {
+  const { semantic, fonts, themeName } = useTheme();
+  const monoStyle = { fontFamily: fonts.mono, fontWeight: 800 };
+  const HEADING_STYLE = { fontFamily: fonts.heading, letterSpacing: '0.06em' };
+  const tabBorderWidth = themeName === 'nationalPark' ? '2px' : '1px';
   const [activeTab, setActiveTab] = useState('Base Layers');
   const [catalog, setCatalog] = useState({ baseLayers: [], outerwear: [] });
   const [editingItem, setEditingItem] = useState(null);
   const [adding, setAdding] = useState(false);
   const dragStartY = useRef(null);
+  const scrollRef = useRef(null);
+
+  useEffect(() => {
+    if (open && scrollRef.current) scrollRef.current.scrollTop = 0;
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -354,17 +373,17 @@ export default function ClothingDrawer({ open, onClose }) {
         style={{
           height: '80vh',
           maxHeight: '1000px',
-          backgroundColor: semantic.overlay,
+          backgroundColor: semantic.drawerBg,
           borderRadius: '12px 12px 0 0',
           transform: open ? 'translateY(0)' : 'translateY(100%)',
           borderTop: `1px solid ${semantic.divider}`,
         }}
       >
         {/* Close button + Tabs */}
-        <div className="shrink-0 flex items-center justify-center px-5 pt-5 pb-2 relative">
+        <div className="shrink-0 flex items-center justify-start px-5 pt-5 pb-2 relative">
           <div
             className="relative inline-flex rounded-full p-1"
-            style={{ backgroundColor: semantic.inputBg, border: `1px solid ${semantic.inputBorder}` }}
+            style={{ backgroundColor: 'transparent', border: `${tabBorderWidth} solid ${semantic.inputBorder}` }}
           >
             <div
               className="absolute top-1 bottom-1 rounded-full"
@@ -373,6 +392,7 @@ export default function ClothingDrawer({ open, onClose }) {
                 width: 'calc(50% - 4px)',
                 left: activeTab === 'Base Layers' ? '4px' : 'calc(50%)',
                 transition: 'left 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                boxShadow: 'inset 2px 2px 0 0 rgba(0,0,0,0.25)',
               }}
             />
             {TABS.map(tab => (
@@ -383,7 +403,7 @@ export default function ClothingDrawer({ open, onClose }) {
                 style={{
                   fontFamily: fonts.heading,
                   letterSpacing: '0.04em',
-                  color: activeTab === tab ? semantic.primaryText : semantic.brand60,
+                  color: activeTab === tab ? semantic.textLight : semantic.labelText,
                   transition: 'color 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                   zIndex: 1,
                 }}
@@ -392,19 +412,11 @@ export default function ClothingDrawer({ open, onClose }) {
               </button>
             ))}
           </div>
-          <button
-            onClick={onClose}
-            className="absolute right-5 w-9 h-9 flex items-center justify-center rounded-full transition-opacity hover:opacity-70"
-            style={{ backgroundColor: semantic.inputBg, border: `1px solid ${semantic.inputBorder}` }}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <path d="M18 6L6 18M6 6l12 12" stroke={semantic.brand} strokeWidth="2" strokeLinecap="round" />
-            </svg>
-          </button>
+          <CloseButton onClick={onClose} className="absolute right-5" />
         </div>
 
         {/* Grid — scrollable */}
-        <div className="flex-1 overflow-y-auto px-5 pt-5 pb-24">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 pt-5 pb-8">
           <div className="grid grid-cols-2 gap-4 mx-auto" style={{ maxWidth: '600px' }}>
             {items.map(item => (
               <button
@@ -428,23 +440,23 @@ export default function ClothingDrawer({ open, onClose }) {
               </button>
             ))}
           </div>
-        </div>
 
-        {/* Add Clothing button */}
-        <div className="absolute bottom-0 left-0 right-0 flex justify-center pb-8 pt-4">
-          <button
-            onClick={() => setAdding(true)}
-            className="inline-flex items-center gap-2 px-6 py-2 rounded-sm text-xl transition-opacity hover:opacity-80"
-            style={{
-              ...HEADING_STYLE,
-              backgroundColor: semantic.brand,
-              color: semantic.primaryText,
-              boxShadow: semantic.brandShadow,
-            }}
-          >
-            <PlusIcon width={16} height={16} />
-            ADD CLOTHING
-          </button>
+          {/* Add Clothing button — inline at bottom of list */}
+          <div className="flex justify-center pt-6 pb-2">
+            <button
+              onClick={() => setAdding(true)}
+              className="inline-flex items-center gap-2 px-6 py-2 rounded-sm text-xl transition-opacity hover:opacity-80"
+              style={{
+                ...HEADING_STYLE,
+                backgroundColor: semantic.brand,
+                color: semantic.primaryButtonColor,
+                boxShadow: semantic.primaryButtonShadow,
+              }}
+            >
+              <PlusIcon width={16} height={16} />
+              ADD CLOTHING
+            </button>
+          </div>
         </div>
 
         {/* Add panel */}

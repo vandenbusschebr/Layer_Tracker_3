@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { createActivity } from '../lib/api';
-import { semantic, monoStyle, labelStyle as LABEL_STYLE, inputStyle as INPUT_STYLE, headingStyle as HEADING_STYLE, feelConfig } from '../lib/theme';
+import { useTheme } from '../lib/ThemeContext';
 import ClothingPicker from './ClothingPicker';
+import FeelPicker from './FeelPicker';
+import CloseButton from './CloseButton';
 
 const ACTIVITY_TYPES = [
   { label: 'Hike', emoji: '🥾' },
@@ -12,14 +14,6 @@ const ACTIVITY_TYPES = [
   { label: 'Climbing', emoji: '🧗' },
 ];
 
-const FEEL_OPTIONS = Object.entries(feelConfig).map(([label, cfg]) => ({
-  label,
-  emoji: cfg.label.split(' ')[0],
-  activeColor: cfg.activeColor,
-  activeBorder: cfg.activeBorder,
-  activeText: semantic.primaryText,
-}));
-
 function today() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -27,6 +21,15 @@ function today() {
 
 
 export default function LogActivityDrawer({ open, onClose, clothingCatalog = [], onSaved }) {
+  const { semantic, fonts, feelConfig, themeName } = useTheme();
+  const inputClass = themeName === 'nationalPark' ? 'np-input' : '';
+  const monoStyle = { fontFamily: fonts.mono, fontWeight: 800 };
+  const LABEL_STYLE = { ...monoStyle, color: semantic.labelText, fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase' };
+  const INPUT_STYLE = { ...monoStyle, backgroundColor: semantic.inputBg, border: `1px solid ${semantic.inputBorder}`, borderRadius: '8px', color: semantic.primaryText, fontSize: '14px', padding: '10px 12px', width: '100%', outline: 'none' };
+  const HEADING_STYLE = { fontFamily: fonts.heading, letterSpacing: '0.06em' };
+  const isNP = themeName === 'nationalPark';
+  const FEEL_OPTIONS = Object.entries(feelConfig).map(([label, cfg]) => ({ label, emoji: cfg.label.split(' ')[0], activeColor: cfg.activeColor, activeBorder: cfg.activeBorder, activeText: semantic.primaryText, feelColor: cfg.color }));
+
   const [activityType, setActivityType] = useState(ACTIVITY_TYPES[0]);
   const [date, setDate] = useState(today());
   const [location, setLocation] = useState('');
@@ -40,9 +43,11 @@ export default function LogActivityDrawer({ open, onClose, clothingCatalog = [],
   const [errors, setErrors] = useState({});
 
   const drawerRef = useRef(null);
+  const scrollRef = useRef(null);
 
   useEffect(() => {
     if (open) {
+      if (scrollRef.current) scrollRef.current.scrollTop = 0;
       setActivityType(ACTIVITY_TYPES[0]);
       setDate(today());
       setLocation('');
@@ -112,19 +117,11 @@ export default function LogActivityDrawer({ open, onClose, clothingCatalog = [],
         {/* Title row with close button */}
         <div className="px-5 pt-12 pb-4 shrink-0 flex items-center justify-between">
           <h2 className="text-3xl" style={{ ...HEADING_STYLE, color: semantic.primaryText }}>LOG ACTIVITY</h2>
-          <button
-            onClick={onClose}
-            className="w-9 h-9 flex items-center justify-center rounded-full transition-opacity hover:opacity-70"
-            style={{ backgroundColor: semantic.inputBg, border: `1px solid ${semantic.inputBorder}` }}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <path d="M18 6L6 18M6 6l12 12" stroke={semantic.brand} strokeWidth="2" strokeLinecap="round" />
-            </svg>
-          </button>
+          <CloseButton onClick={onClose} />
         </div>
 
         {/* Scrollable content */}
-        <div className="overflow-y-auto flex-1 px-5 pb-8 space-y-6" style={{ overflowX: 'hidden', overscrollBehaviorX: 'none' }}>
+        <div ref={scrollRef} className="overflow-y-auto flex-1 px-5 pb-8 space-y-6" style={{ overflowX: 'hidden', overscrollBehaviorX: 'none' }}>
 
           {/* Date */}
           <div>
@@ -133,7 +130,7 @@ export default function LogActivityDrawer({ open, onClose, clothingCatalog = [],
               type="date"
               value={date}
               onChange={e => setDate(e.target.value)}
-              style={{ ...INPUT_STYLE, colorScheme: 'dark' }}
+              style={{ ...INPUT_STYLE, colorScheme: themeName === 'nationalPark' ? 'light' : 'dark' }}
             />
           </div>
 
@@ -145,6 +142,7 @@ export default function LogActivityDrawer({ open, onClose, clothingCatalog = [],
               value={location}
               onChange={e => setLocation(e.target.value)}
               placeholder="e.g. Bear Peak"
+              className={inputClass}
               style={{
                 ...INPUT_STYLE,
                 border: errors.location ? `1px solid ${semantic.error}` : `1px solid ${semantic.inputBorder}`,
@@ -183,26 +181,7 @@ export default function LogActivityDrawer({ open, onClose, clothingCatalog = [],
           {/* Feel */}
           <div>
             <p className="mb-2" style={LABEL_STYLE}>Feel</p>
-            <div className="flex gap-2">
-              {FEEL_OPTIONS.map(f => {
-                const active = feel === f.label;
-                return (
-                  <button
-                    key={f.label}
-                    onClick={() => setFeel(f.label)}
-                    className="flex-1 py-2 rounded-lg text-sm transition-all"
-                    style={{
-                      ...monoStyle,
-                      backgroundColor: active ? f.activeColor : semantic.inputBg,
-                      border: active ? `1px solid ${f.activeBorder}` : `1px solid ${semantic.inputBorder}`,
-                      color: active ? f.activeText : semantic.labelText,
-                    }}
-                  >
-                    {f.emoji} {f.label}
-                  </button>
-                );
-              })}
-            </div>
+            <FeelPicker selected={feel} onToggle={setFeel} />
           </div>
 
           {/* Weather */}
@@ -215,34 +194,39 @@ export default function LogActivityDrawer({ open, onClose, clothingCatalog = [],
                   value={temp}
                   onChange={e => setTemp(e.target.value.replace(/[^\d.-]/g, ''))}
                   placeholder="Temp"
+                  className={inputClass}
                   style={{ ...INPUT_STYLE, paddingRight: '36px' }}
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
                   style={{ ...monoStyle, fontSize: '13px', color: semantic.labelText }}>°F</span>
               </div>
-              <select
-                value={skies}
-                onChange={e => setSkies(e.target.value)}
-                style={{ ...INPUT_STYLE, flex: 1, colorScheme: 'dark', paddingRight: '32px', textAlignLast: 'left', color: skies ? semantic.primaryText : semantic.placeholderText }}
-              >
-                <option value="" disabled hidden>Skies</option>
-                <option value="☀️">☀️ Sunny</option>
-                <option value="🌥️">🌥️ Mixed</option>
-                <option value="☁️">☁️ Cloudy</option>
-                <option value="🌧️">🌧️ Rain</option>
-                <option value="❄️">❄️ Snow</option>
-              </select>
-              <select
-                value={wind}
-                onChange={e => setWind(e.target.value)}
-                style={{ ...INPUT_STYLE, flex: 1, colorScheme: 'dark', paddingLeft: '12px', paddingRight: '32px', textAlignLast: 'left', color: wind ? semantic.primaryText : semantic.placeholderText }}
-              >
-                <option value="" disabled hidden>Wind</option>
-                <option value="No Wind">No Wind</option>
-                <option value="Breezy">Breezy</option>
-                <option value="Tornado">Tornado</option>
-                <option value="❄️">❄️ Snow</option>
-              </select>
+              <div style={{ flex: 1 }}>
+                <select
+                  value={skies}
+                  onChange={e => setSkies(e.target.value)}
+                  style={{ ...INPUT_STYLE, colorScheme: themeName === 'nationalPark' ? 'light' : 'dark', paddingRight: '32px', textAlignLast: 'left', color: skies ? semantic.primaryText : semantic.labelText }}
+                >
+                  <option value="" disabled hidden>Skies</option>
+                  <option value="☀️">☀️ Sunny</option>
+                  <option value="🌥️">🌥️ Mixed</option>
+                  <option value="☁️">☁️ Cloudy</option>
+                  <option value="🌧️">🌧️ Rain</option>
+                  <option value="❄️">❄️ Snow</option>
+                </select>
+              </div>
+              <div style={{ flex: 1 }}>
+                <select
+                  value={wind}
+                  onChange={e => setWind(e.target.value)}
+                  style={{ ...INPUT_STYLE, colorScheme: themeName === 'nationalPark' ? 'light' : 'dark', paddingLeft: '12px', paddingRight: '32px', textAlignLast: 'left', color: wind ? semantic.primaryText : semantic.labelText }}
+                >
+                  <option value="" disabled hidden>Wind</option>
+                  <option value="No Wind">No Wind</option>
+                  <option value="Breezy">Breezy</option>
+                  <option value="Tornado">Tornado</option>
+                  <option value="❄️">❄️ Snow</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -267,8 +251,8 @@ export default function LogActivityDrawer({ open, onClose, clothingCatalog = [],
               ...HEADING_STYLE,
               maxWidth: '250px',
               backgroundColor: saving ? semantic.brandSaving : semantic.brand,
-              color: semantic.primaryText,
-              boxShadow: semantic.brandShadow,
+              color: semantic.primaryButtonColor,
+              boxShadow: semantic.primaryButtonShadow,
             }}
           >
             {saving ? 'SAVING...' : 'SAVE ACTIVITY'}

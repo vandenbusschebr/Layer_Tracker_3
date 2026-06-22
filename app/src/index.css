@@ -43,6 +43,11 @@
   color: rgba(245, 244, 242, 0.5);
 }
 
+.np-input::placeholder {
+  color: #A28266;
+  opacity: 1;
+}
+
 html, body {
   margin: 0;
   background-color: #000000;

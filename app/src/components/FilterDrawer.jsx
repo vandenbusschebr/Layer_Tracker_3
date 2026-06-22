@@ -1,9 +1,31 @@
-import { semantic, fonts, monoStyle, labelStyle as LABEL_STYLE, headingStyle as HEADING_STYLE, feelConfig } from '../lib/theme';
+import { useEffect, useRef } from 'react';
+import { useTheme } from '../lib/ThemeContext';
+import FeelPicker from './FeelPicker';
+import CloseButton from './CloseButton';
 
 const TEMP_MIN = -32;
 const TEMP_MAX = 120;
 
-function TempRangeSlider({ value, onChange }) {
+const SORT_OPTIONS = [
+  { value: 'date-desc', label: 'Date: Most Recent' },
+  { value: 'date-asc',  label: 'Date: Oldest' },
+  { value: 'location',  label: 'Location: A to Z' },
+];
+
+const ACTIVITY_TYPES = [
+  { label: 'Hike',          emoji: '🥾' },
+  { label: 'Mountain Bike', emoji: '🚵' },
+  { label: 'Snowboarding',  emoji: '🏂' },
+  { label: 'Trail Run',     emoji: '🏃' },
+  { label: 'Skiing',        emoji: '⛷️' },
+  { label: 'Climbing',      emoji: '🧗' },
+];
+
+function toggle(arr, val) {
+  return arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val];
+}
+
+function TempRangeSlider({ value, onChange, semantic, monoStyle }) {
   const [lo, hi] = value;
   const pct = v => ((v - TEMP_MIN) / (TEMP_MAX - TEMP_MIN)) * 100;
   const midPct = (pct(lo) + pct(hi)) / 2;
@@ -15,36 +37,24 @@ function TempRangeSlider({ value, onChange }) {
         <span>{hi}°</span>
       </div>
       <div className="relative h-6 flex items-center">
-        {/* Track */}
         <div className="absolute left-0 right-0 h-1 rounded-full" style={{ backgroundColor: semantic.inputBorder }} />
-        {/* Active fill */}
         <div
           className="absolute h-1 rounded-full"
           style={{ left: `${pct(lo)}%`, right: `${100 - pct(hi)}%`, backgroundColor: semantic.brand }}
         />
-        {/* Min thumb — covers left half of track */}
         <input
           type="range"
           min={TEMP_MIN} max={TEMP_MAX} value={lo}
           onChange={e => onChange([Math.min(Number(e.target.value), hi - 1), hi])}
           className="absolute w-full appearance-none bg-transparent"
-          style={{
-            zIndex: 3,
-            clipPath: `inset(0 ${100 - midPct}% 0 0)`,
-            WebkitClipPath: `inset(0 ${100 - midPct}% 0 0)`,
-          }}
+          style={{ zIndex: 3, clipPath: `inset(0 ${100 - midPct}% 0 0)`, WebkitClipPath: `inset(0 ${100 - midPct}% 0 0)` }}
         />
-        {/* Max thumb — covers right half of track */}
         <input
           type="range"
           min={TEMP_MIN} max={TEMP_MAX} value={hi}
           onChange={e => onChange([lo, Math.max(Number(e.target.value), lo + 1)])}
           className="absolute w-full appearance-none bg-transparent"
-          style={{
-            zIndex: 3,
-            clipPath: `inset(0 0 0 ${midPct}%)`,
-            WebkitClipPath: `inset(0 0 0 ${midPct}%)`,
-          }}
+          style={{ zIndex: 3, clipPath: `inset(0 0 0 ${midPct}%)`, WebkitClipPath: `inset(0 0 0 ${midPct}%)` }}
         />
       </div>
       <div className="flex justify-between mt-1" style={{ ...monoStyle, fontSize: '10px', color: semantic.mutedText }}>
@@ -73,33 +83,24 @@ function TempRangeSlider({ value, onChange }) {
   );
 }
 
-const SORT_OPTIONS = [
-  { value: 'date-desc', label: 'Date: Most Recent' },
-  { value: 'date-asc',  label: 'Date: Oldest' },
-  { value: 'location',  label: 'Location: A to Z' },
-];
-
-const ACTIVITY_TYPES = [
-  { label: 'Hike',          emoji: '🥾' },
-  { label: 'Mountain Bike', emoji: '🚵' },
-  { label: 'Snowboarding',  emoji: '🏂' },
-  { label: 'Trail Run',     emoji: '🏃' },
-  { label: 'Skiing',        emoji: '⛷️' },
-  { label: 'Climbing',      emoji: '🧗' },
-];
-
-const FEEL_OPTIONS = Object.entries(feelConfig).map(([label, cfg]) => ({
-  label,
-  emoji: cfg.label.split(' ')[0],
-  activeColor: cfg.activeColor,
-  activeBorder: cfg.activeBorder,
-}));
-
-function toggle(arr, val) {
-  return arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val];
-}
-
 export default function FilterDrawer({ open, onClose, filters, onChange }) {
+  const { semantic, fonts, feelConfig } = useTheme();
+  const scrollRef = useRef(null);
+  const monoStyle = { fontFamily: fonts.mono, fontWeight: 800 };
+
+  useEffect(() => {
+    if (open && scrollRef.current) scrollRef.current.scrollTop = 0;
+  }, [open]);
+  const LABEL_STYLE = { ...monoStyle, color: semantic.labelText, fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase' };
+  const HEADING_STYLE = { fontFamily: fonts.heading, letterSpacing: '0.06em' };
+
+  const FEEL_OPTIONS = Object.entries(feelConfig).map(([label, cfg]) => ({
+    label,
+    emoji: cfg.label.split(' ')[0],
+    activeColor: cfg.activeColor,
+    activeBorder: cfg.activeBorder,
+  }));
+
   function handleReset() {
     onChange({ sort: 'date-desc', types: [], feels: [], tempRange: [TEMP_MIN, TEMP_MAX] });
   }
@@ -139,29 +140,16 @@ export default function FilterDrawer({ open, onClose, filters, onChange }) {
             {activeFilterCount > 0 && (
               <button
                 onClick={handleReset}
-                style={{
-                  ...monoStyle,
-                  fontSize: '12px',
-                  color: semantic.brand,
-                  letterSpacing: '0.04em',
-                }}
+                style={{ ...monoStyle, fontSize: '12px', color: semantic.brand, letterSpacing: '0.04em' }}
               >
                 RESET
               </button>
             )}
-            <button
-              onClick={onClose}
-              className="w-9 h-9 flex items-center justify-center rounded-full transition-opacity hover:opacity-70"
-              style={{ backgroundColor: semantic.inputBg, border: `1px solid ${semantic.inputBorder}` }}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                <path d="M18 6L6 18M6 6l12 12" stroke={semantic.brand} strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            </button>
+            <CloseButton onClick={onClose} />
           </div>
         </div>
 
-        <div className="overflow-y-auto flex-1 px-5 space-y-6" style={{ paddingBottom: '88px' }}>
+        <div ref={scrollRef} className="overflow-y-auto flex-1 px-5 space-y-6" style={{ paddingBottom: '88px' }}>
 
           {/* Sort */}
           <div>
@@ -198,7 +186,7 @@ export default function FilterDrawer({ open, onClose, filters, onChange }) {
             </div>
           </div>
 
-          {/* Filter: Activity Type */}
+          {/* Activity Type */}
           <div>
             <p className="mb-2" style={LABEL_STYLE}>Activity Type</p>
             <div className="grid grid-cols-2 gap-2">
@@ -224,29 +212,13 @@ export default function FilterDrawer({ open, onClose, filters, onChange }) {
             </div>
           </div>
 
-          {/* Filter: Feel */}
+          {/* Feel */}
           <div>
             <p className="mb-2" style={LABEL_STYLE}>Feel</p>
-            <div className="flex gap-2">
-              {FEEL_OPTIONS.map(f => {
-                const active = filters.feels.includes(f.label);
-                return (
-                  <button
-                    key={f.label}
-                    onClick={() => onChange({ ...filters, feels: toggle(filters.feels, f.label) })}
-                    className="flex-1 py-2 rounded-lg text-sm transition-all"
-                    style={{
-                      ...monoStyle,
-                      backgroundColor: active ? f.activeColor : semantic.inputBg,
-                      border: active ? `1px solid ${f.activeBorder}` : `1px solid ${semantic.inputBorder}`,
-                      color: active ? semantic.primaryText : semantic.labelText,
-                    }}
-                  >
-                    {f.emoji} {f.label}
-                  </button>
-                );
-              })}
-            </div>
+            <FeelPicker
+              selected={filters.feels}
+              onToggle={label => onChange({ ...filters, feels: toggle(filters.feels, label) })}
+            />
           </div>
 
           {/* Temperature */}
@@ -255,32 +227,32 @@ export default function FilterDrawer({ open, onClose, filters, onChange }) {
             <TempRangeSlider
               value={filters.tempRange ?? [TEMP_MIN, TEMP_MAX]}
               onChange={v => onChange({ ...filters, tempRange: v })}
+              semantic={semantic}
+              monoStyle={monoStyle}
             />
           </div>
 
-        </div>
-
-        <div className="pb-6 shrink-0" />
-      </div>
-
-      {/* Floating Apply button */}
-      {open && (
-        <div className="fixed bottom-6 left-0 right-0 px-5 z-50" style={{ pointerEvents: 'none' }}>
           <button
             onClick={onClose}
             className="w-full py-4 rounded-xl text-xl transition-opacity hover:opacity-80"
             style={{
               ...HEADING_STYLE,
-              pointerEvents: 'auto',
+              maxWidth: '250px',
+              marginLeft: 'auto',
+              marginRight: 'auto',
+              display: 'block',
               backgroundColor: semantic.brand,
-              color: semantic.primaryText,
-              boxShadow: '0 8px 24px rgba(0,0,0,0.5), 0 4px 16px rgba(75,141,133,0.4)',
+              color: semantic.primaryButtonColor,
+              boxShadow: semantic.primaryButtonShadow,
             }}
           >
             APPLY
           </button>
+
         </div>
-      )}
+
+        <div className="pb-6 shrink-0" />
+      </div>
     </>
   );
 }
