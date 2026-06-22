@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { updateActivityItem, deleteActivityItem } from '../lib/api';
-import { semantic, monoStyle, labelStyle as LABEL_STYLE, inputStyle as INPUT_STYLE, headingStyle as HEADING_STYLE, feelConfig } from '../lib/theme';
+import { useTheme } from '../lib/ThemeContext';
 import ClothingPicker from './ClothingPicker';
+import CloseButton from './CloseButton';
 
 const ACTIVITY_TYPES = [
   { label: 'Hike',          emoji: '🥾' },
@@ -12,16 +13,14 @@ const ACTIVITY_TYPES = [
   { label: 'Climbing',      emoji: '🧗' },
 ];
 
-const FEEL_OPTIONS = Object.entries(feelConfig).map(([label, cfg]) => ({
-  label,
-  emoji: cfg.label.split(' ')[0],
-  activeColor: cfg.activeColor,
-  activeBorder: cfg.activeBorder,
-  activeText: semantic.primaryText,
-}));
-
-
 export default function EditActivityDrawer({ open, onClose, activity, clothingCatalog = [], onSaved, onDeleted }) {
+  const { semantic, fonts, feelConfig } = useTheme();
+  const monoStyle = { fontFamily: fonts.mono, fontWeight: 800 };
+  const LABEL_STYLE = { ...monoStyle, color: semantic.labelText, fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase' };
+  const INPUT_STYLE = { ...monoStyle, backgroundColor: semantic.inputBg, border: `1px solid ${semantic.inputBorder}`, borderRadius: '8px', color: semantic.primaryText, fontSize: '14px', padding: '10px 12px', width: '100%', outline: 'none' };
+  const HEADING_STYLE = { fontFamily: fonts.heading, letterSpacing: '0.06em' };
+  const FEEL_OPTIONS = Object.entries(feelConfig).map(([label, cfg]) => ({ label, emoji: cfg.label.split(' ')[0], activeColor: cfg.activeColor, activeBorder: cfg.activeBorder, activeText: semantic.primaryText }));
+
   const [activityType, setActivityType] = useState(ACTIVITY_TYPES[0]);
   const [date, setDate] = useState('');
   const [location, setLocation] = useState('');
@@ -36,10 +35,11 @@ export default function EditActivityDrawer({ open, onClose, activity, clothingCa
   const [errors, setErrors] = useState({});
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
   const original = useRef(null);
-
+  const scrollRef = useRef(null);
 
   useEffect(() => {
     if (open && activity) {
+      if (scrollRef.current) scrollRef.current.scrollTop = 0;
       const found = ACTIVITY_TYPES.find(t => t.label === activity.type) ?? ACTIVITY_TYPES[0];
       setActivityType(found);
       setDate(activity.date ?? '');
@@ -155,19 +155,11 @@ export default function EditActivityDrawer({ open, onClose, activity, clothingCa
         {/* Title row with close button */}
         <div className="px-5 pt-12 pb-4 shrink-0 flex items-center justify-between">
           <h2 className="text-3xl" style={{ ...HEADING_STYLE, color: semantic.primaryText }}>EDIT ACTIVITY</h2>
-          <button
-            onClick={handleClose}
-            className="w-9 h-9 flex items-center justify-center rounded-full transition-opacity hover:opacity-70"
-            style={{ backgroundColor: semantic.inputBg, border: `1px solid ${semantic.inputBorder}` }}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <path d="M18 6L6 18M6 6l12 12" stroke={semantic.brand} strokeWidth="2" strokeLinecap="round" />
-            </svg>
-          </button>
+          <CloseButton onClick={handleClose} />
         </div>
 
         {/* Scrollable content */}
-        <div className="overflow-y-auto flex-1" style={{ overflowX: 'hidden', overscrollBehaviorX: 'none' }}>
+        <div ref={scrollRef} className="overflow-y-auto flex-1" style={{ overflowX: 'hidden', overscrollBehaviorX: 'none' }}>
         <div className="px-5 space-y-6 mx-auto w-full" style={{ maxWidth: '600px' }}>
 
           {/* Date */}
@@ -282,8 +274,8 @@ export default function EditActivityDrawer({ open, onClose, activity, clothingCa
                 ...HEADING_STYLE,
                 maxWidth: '250px',
                 backgroundColor: saving ? semantic.brandSaving : semantic.brand,
-                color: semantic.primaryText,
-                boxShadow: semantic.brandShadow,
+                color: semantic.primaryButtonColor,
+                boxShadow: semantic.primaryButtonShadow,
               }}
             >
               {saving ? 'SAVING...' : 'SAVE'}
